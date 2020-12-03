@@ -35,5 +35,5 @@ func TestCmd(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 	core.SetLogger = func(l logr.Logger) {}
-	logf.SetLogger(zap.LoggerTo(GinkgoWriter, true))
+	logf.SetLogger(zap.New(zap.UseDevMode(true), zap.WriteTo(GinkgoWriter)))
 })
