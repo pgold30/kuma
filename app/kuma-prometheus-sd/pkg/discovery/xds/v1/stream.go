@@ -1,7 +1,8 @@
-package xds
+package v1
 
 import (
 	"context"
+	"github.com/kumahq/kuma/app/kuma-prometheus-sd/pkg/discovery/xds"
 	"io"
 
 	"github.com/go-logr/logr"
@@ -10,18 +11,35 @@ import (
 
 	"github.com/prometheus/prometheus/discovery/targetgroup"
 
-	mads_client "github.com/kumahq/kuma/pkg/mads/client"
+	mads_v1_client "github.com/kumahq/kuma/pkg/mads/v1/client"
 )
 
-type stream struct {
+type streamDiscoverer struct {
 	log     logr.Logger
-	config  DiscoveryConfig
+	config  xds.DiscoveryConfig
 	handler *Handler
 }
 
-func (s *stream) Run(ctx context.Context, ch chan<- []*targetgroup.Group) (errs error) {
+type streamFactory struct {
+	handler Handler
+}
+
+// CreateDiscoverer implements xds.DiscovererFactory
+func (f *streamFactory) CreateDiscoverer(config xds.DiscoveryConfig, log logr.Logger) xds.DiscovererE {
+	return &streamDiscoverer{
+		log:     log,
+		config:  config,
+		handler: &f.handler,
+	}
+}
+
+func NewFactory() xds.DiscovererFactory {
+	return &streamFactory{}
+}
+
+func (s *streamDiscoverer) Run(ctx context.Context, ch chan<- []*targetgroup.Group) (errs error) {
 	s.log.Info("creating a gRPC client for Monitoring Assignment Discovery Service (MADS) server ...")
-	client, err := mads_client.New(s.config.ServerURL)
+	client, err := mads_v1_client.New(s.config.ServerURL)
 	if err != nil {
 		return errors.Wrap(err, "failed to connect to gRPC server")
 	}

@@ -22,7 +22,7 @@ import (
 	"github.com/kumahq/kuma/pkg/insights"
 	kds_global "github.com/kumahq/kuma/pkg/kds/global"
 	kds_remote "github.com/kumahq/kuma/pkg/kds/remote"
-	mads_server "github.com/kumahq/kuma/pkg/mads/server"
+	mads_server "github.com/kumahq/kuma/pkg/mads/v1alpha1/server"
 	metrics "github.com/kumahq/kuma/pkg/metrics/components"
 	sds_server "github.com/kumahq/kuma/pkg/sds/server"
 	kuma_version "github.com/kumahq/kuma/pkg/version"

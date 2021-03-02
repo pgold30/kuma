@@ -1,16 +1,15 @@
-package xds_test
+package v1_test
 
 import (
+	"github.com/kumahq/kuma/app/kuma-prometheus-sd/pkg/discovery/xds/v1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
 
-	. "github.com/kumahq/kuma/app/kuma-prometheus-sd/pkg/discovery/xds"
-
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/discovery/targetgroup"
 
-	observability_proto "github.com/kumahq/kuma/api/observability/v1alpha1"
+	observability_v1 "github.com/kumahq/kuma/api/observability/v1"
 )
 
 var _ = Describe("Converter", func() {
@@ -18,23 +17,23 @@ var _ = Describe("Converter", func() {
 	Describe("Convert()", func() {
 
 		type testCase struct {
-			input    *observability_proto.MonitoringAssignment
+			input    *observability_v1.MonitoringAssignment
 			expected []*targetgroup.Group
 		}
 
 		DescribeTable("should convert Kuma MonitoringAssignments into Prometheus Target Groups",
 			func(given testCase) {
 				// setup
-				c := Converter{}
+				c := v1.Converter{}
 				// when
 				actual := c.Convert(given.input)
 				// then
 				Expect(actual).To(Equal(given.expected))
 			},
 			Entry("1 Dataplane per assignment, in the format expected by `custom-sd` adapter", testCase{
-				input: &observability_proto.MonitoringAssignment{
+				input: &observability_v1.MonitoringAssignment{
 					Name: "/meshes/default/dataplanes/backend-01",
-					Targets: []*observability_proto.MonitoringAssignment_Target{{
+					Targets: []*observability_v1.MonitoringAssignment_Target{{
 						Labels: map[string]string{
 							"__address__": "192.168.0.1:8080",
 						},
@@ -70,9 +69,9 @@ var _ = Describe("Converter", func() {
 				}},
 			}),
 			Entry("1 Dataplane per assignment, in a free format", testCase{
-				input: &observability_proto.MonitoringAssignment{
+				input: &observability_v1.MonitoringAssignment{
 					Name: "/meshes/default/dataplanes/backend-01",
-					Targets: []*observability_proto.MonitoringAssignment_Target{{
+					Targets: []*observability_v1.MonitoringAssignment_Target{{
 						Labels: map[string]string{
 							"__address__":      "192.168.0.1:8080",
 							"__scheme__":       "http",
@@ -108,9 +107,9 @@ var _ = Describe("Converter", func() {
 				}},
 			}),
 			Entry("N Dataplanes per assignment, in a free format", testCase{
-				input: &observability_proto.MonitoringAssignment{
+				input: &observability_v1.MonitoringAssignment{
 					Name: "/meshes/default/services/backend",
-					Targets: []*observability_proto.MonitoringAssignment_Target{
+					Targets: []*observability_v1.MonitoringAssignment_Target{
 						{
 							Labels: map[string]string{
 								"__address__":      "192.168.0.1:8080",
